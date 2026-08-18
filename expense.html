@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Personal Expense Calculator</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 400px;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 25px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #777;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 7px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 8px;
+            background: #667eea;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #5568d9;
+        }
+
+        .summaryBtn {
+            background: #28a745;
+        }
+
+        .summaryBtn:hover {
+            background: #218838;
+        }
+
+        #result {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f5f6ff;
+            border-radius: 12px;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .total {
+            color: red;
+            font-weight: bold;
+        }
+
+        .savings {
+            color: green;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>💰 Personal Expense Calculator</h1>
+
+    <p class="subtitle">
+        Track your income, expenses and savings
+    </p>
+
+    <label>Monthly Income</label>
+    <input type="number" id="income" placeholder="Enter your income">
+
+    <label>Expense Category</label>
+    <select id="category">
+        <option value="Food">🍔 Food</option>
+        <option value="Transport">🚌 Transport</option>
+        <option value="Bills">💡 Bills</option>
+        <option value="Entertainment">🎬 Entertainment</option>
+        <option value="Others">📦 Others</option>
+    </select>
+
+    <label>Expense Amount</label>
+    <input type="number" id="amount" placeholder="Enter expense amount">
+
+    <button onclick="addExpense()">
+        ➕ Add Expense
+    </button>
+
+    <button class="summaryBtn" onclick="showSummary()">
+        📊 Show Summary
+    </button>
+
+    <div id="result"></div>
+
+</div>
+
+<script>
+
+    let expenses = {
+        Food: 0,
+        Transport: 0,
+        Bills: 0,
+        Entertainment: 0,
+        Others: 0
+    };
+
+    function addExpense() {
+
+        let category = document.getElementById("category").value;
+        let amount = Number(document.getElementById("amount").value);
+
+        if (amount <= 0) {
+            alert("Please enter a valid amount");
+            return;
+        }
+
+        expenses[category] += amount;
+
+        alert("Expense added successfully!");
+
+        document.getElementById("amount").value = "";
+    }
+
+    function showSummary() {
+
+        let income = Number(document.getElementById("income").value);
+
+        if (income <= 0) {
+            alert("Please enter your income");
+            return;
+        }
+
+        let total = 0;
+
+        for (let category in expenses) {
+            total += expenses[category];
+        }
+
+        let savings = income - total;
+
+        document.getElementById("result").innerHTML = `
+            <h3>📊 Expense Summary</h3>
+
+            <p>💵 Income: ₹${income}</p>
+
+            <p>🍔 Food: ₹${expenses.Food}</p>
+            <p>🚌 Transport: ₹${expenses.Transport}</p>
+            <p>💡 Bills: ₹${expenses.Bills}</p>
+            <p>🎬 Entertainment: ₹${expenses.Entertainment}</p>
+            <p>📦 Others: ₹${expenses.Others}</p>
+
+            <hr>
+
+            <p class="total">
+                Total Expenses: ₹${total}
+            </p>
+
+            <p class="savings">
+                💰 Savings: ₹${savings}
+            </p>
+        `;
+    }
+
+</script>
+
+</body>
+</html>
