@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<head>
+    <title>Weather Dashboard</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #4e6769, #2d323d);
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin-bottom: 8px;
+        }
+        .search {
+            display: flex;
+            gap: 10px;
+            background: linen;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 16px;
+        }
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 7px;
+            background: #2463eb;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #7b818d;
+        }
+        #message {
+            text-align: center;
+            color: red;
+            margin: 10px;
+        }
+        .card {
+            background: linen;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 20px #0003;
+        }
+        .city {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .location {
+            color: #666;
+            margin: 8px;
+        }
+        .icon {
+            font-size: 60px;
+            margin: 10px;
+        }
+        .temp {
+            font-size: 50px;
+            font-weight: bold;
+            color: #2463eb;
+        }
+        .condition {
+            font-size: 20px;
+            margin: 10px;
+        }
+        .details {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .box {
+            background: #a6b0bd;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .box h3 {
+            font-size: 14px;
+            color: #000000;
+        }
+        .box p {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .sun {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .sun div {
+            background: #a6b0bd;
+            padding: 15px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🌤️ Weather Dashboard</h1>
+        <p>Check current weather</p>
+    </div>
+    <div class="search">
+        <input id="city" placeholder="Enter city name">
+        <button onclick="getWeather()">Search</button>
+    </div>
+    <div id="message"></div>
+    <div class="card">
+        <div class="city" id="cityName">
+            Search for a city
+        </div>
+        <div class="location" id="location">
+            Latitude: -- | Longitude: --
+        </div>
+        <div class="icon" id="icon">🌤️</div>
+        <div class="temp" id="temp">--°C</div>
+        <div class="condition" id="condition">--</div>
+        <div class="details">
+            <div class="box">
+                <h3>💧 Humidity</h3>
+                <p id="humidity">--</p>
+            </div>
+            <div class="box">
+                <h3>💨 Wind</h3>
+                <p id="wind">--</p>
+            </div>
+            <div class="box">
+                <h3>🌡️ Feels Like</h3>
+                <p id="feels">--</p>
+            </div>
+            <div class="box">
+                <h3>🌤️ Weather Code</h3>
+                <p id="code">--</p>
+            </div>
+        </div>
+        <div class="sun">
+            <div>
+                <h3>🌅 Sunrise</h3>
+                <p id="sunrise">--</p>
+            </div>
+            <div>
+                <h3>🌇 Sunset</h3>
+                <p id="sunset">--</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function weatherInfo(code) {
+    if (code == 0) return ["☀️", "Clear Sky"];
+    if (code <= 2) return ["🌤️", "Partly Cloudy"];
+    if (code == 3) return ["☁️", "Cloudy"];
+    if (code <= 48) return ["🌫️", "Fog"];
+    if (code <= 57) return ["🌦️", "Drizzle"];
+    if (code <= 67) return ["🌧️", "Rain"];
+    if (code <= 77) return ["❄️", "Snow"];
+    if (code <= 82) return ["🌦️", "Rain Showers"];
+    if (code <= 86) return ["🌨️", "Snow Showers"];
+    if (code >= 95) return ["⛈️", "Thunderstorm"];
+    return ["🌡️", "Unknown"];
+}
+async function getWeather() {
+    let city = document.getElementById("city").value.trim();
+    let message = document.getElementById("message");
+    if (!city) {
+        message.innerHTML = "Enter a city name";
+        return;
+    }
+    message.innerHTML = "Loading...";
+    try {
+        let geo = await fetch(
+            "https://geocoding-api.open-meteo.com/v1/search?name="
+            + encodeURIComponent(city)
+            + "&count=1&language=en&format=json"
+        );
+        let geoData = await geo.json();
+        if (!geoData.results) {
+            throw new Error("City not found");
+        }
+        let place = geoData.results[0];
+        let weather = await fetch(
+            "https://api.open-meteo.com/v1/forecast?"
+            + "latitude=" + place.latitude
+            + "&longitude=" + place.longitude
+            + "&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,weather_code"
+            + "&daily=sunrise,sunset"
+            + "&timezone=auto"
+        );
+        let data = await weather.json();
+        let current = data.current;
+        document.getElementById("cityName").innerHTML =
+            place.name + ", " + place.country;
+        document.getElementById("location").innerHTML =
+            "Latitude: " + place.latitude.toFixed(4)
+            + " | Longitude: " + place.longitude.toFixed(4);
+        document.getElementById("temp").innerHTML =
+            current.temperature_2m + "°C";
+        document.getElementById("humidity").innerHTML =
+            current.relative_humidity_2m + "%";
+        document.getElementById("wind").innerHTML =
+            current.wind_speed_10m + " km/h";
+        document.getElementById("feels").innerHTML =
+            current.apparent_temperature + "°C";
+        document.getElementById("code").innerHTML =
+            current.weather_code;
+        let info = weatherInfo(current.weather_code);
+        document.getElementById("icon").innerHTML = info[0];
+        document.getElementById("condition").innerHTML = info[1];
+        document.getElementById("sunrise").innerHTML =
+            new Date(data.daily.sunrise[0])
+            .toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        document.getElementById("sunset").innerHTML =
+            new Date(data.daily.sunset[0])
+            .toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        message.innerHTML = "";
+    } catch (error) {
+        message.innerHTML = "❌ " + error.message;
+    }
+}
+document.getElementById("city").addEventListener("keypress", function(e) {
+    if (e.key == "Enter") {
+        getWeather();
+    }
+});
+</script>
+</body>
+</html>
+
